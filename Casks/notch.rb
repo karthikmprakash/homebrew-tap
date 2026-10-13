@@ -2,8 +2,7 @@ cask "notch" do
   version "0.1.0"
   sha256 "a6c01b4797077f5518d4acf2292306b2b39f0a1f5f7f2a3f847dec537f62034d"
 
-  url "https://github.com/karthikmprakash/notch/releases/download/v#{version}/Notch-#{version}.zip",
-      verified: "github.com/karthikmprakash/notch/"
+  url "https://github.com/karthikmprakash/notch/releases/download/v#{version}/Notch-#{version}.zip"
   name "Notch"
   desc "Dynamic Island for the MacBook notch, with tiles and a Claude Code bridge"
   homepage "https://github.com/karthikmprakash/notch"
@@ -13,14 +12,16 @@ cask "notch" do
     strategy :github_latest
   end
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "Notch.app"
+  # Same binary the app uses for its Claude Code hooks, so the hook command is
+  # just `notch --hook` no matter where Homebrew lives.
   binary "#{appdir}/Notch.app/Contents/MacOS/Notch", target: "notch"
 
   caveats <<~EOS
     Notch is signed ad-hoc, not notarized, so the first launch is blocked by
-    Gatekeeper ("Apple could not verify ..."). Allow it once with:
+    Gatekeeper ("Apple could not verify ..."). Allow it once with either:
 
       xattr -dr com.apple.quarantine "#{appdir}/Notch.app"
 
