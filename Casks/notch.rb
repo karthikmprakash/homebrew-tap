@@ -20,8 +20,9 @@ cask "notch" do
   binary "#{appdir}/Notch.app/Contents/MacOS/Notch", target: "notch"
 
   caveats <<~EOS
-    Notch is signed ad-hoc, not notarized, so the first launch is blocked by
-    Gatekeeper ("Apple could not verify ..."). Allow it once with either:
+    Notch is signed ad-hoc, not notarized, so Gatekeeper blocks it until you
+    allow it once. This also blocks the `notch --hook` command, so do this
+    before wiring up the Claude Code hooks:
 
       xattr -dr com.apple.quarantine "#{appdir}/Notch.app"
 
