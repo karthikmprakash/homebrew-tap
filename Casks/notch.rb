@@ -19,14 +19,28 @@ cask "notch" do
   # just `notch --hook` no matter where Homebrew lives.
   binary "#{appdir}/Notch.app/Contents/MacOS/Notch", target: "notch"
 
+  # Releases are signed ad-hoc until a Developer ID certificate is wired into
+  # the release workflow. macOS treats a quarantined, non-notarized bundle
+  # badly: the first time its executable runs, Gatekeeper kills the process and
+  # deletes the bundle - which also breaks the `notch --hook` command that
+  # Claude Code calls. Clearing the download's quarantine flag at install time
+  # avoids that; drop this postflight once releases are notarized.
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/Notch.app"],
+                   sudo: false
+  end
+
   caveats <<~EOS
-    Notch is signed ad-hoc, not notarized, so Gatekeeper blocks it until you
-    allow it once. This also blocks the `notch --hook` command, so do this
-    before wiring up the Claude Code hooks:
+    The quarantine flag is removed automatically because this build is signed
+    ad-hoc rather than notarized. If macOS still refuses to open it, run:
 
       xattr -dr com.apple.quarantine "#{appdir}/Notch.app"
 
-    or install with:  brew install --cask --no-quarantine notch
+    and if you ever see it disappear from /Applications, that is Gatekeeper
+    deleting a quarantined bundle: reinstall with
+
+      brew reinstall --cask notch
 
     Claude Code hooks: point them at the `notch` command this cask links,
     e.g. { "type": "command", "command": "notch --hook" }.
