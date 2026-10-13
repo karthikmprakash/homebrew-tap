@@ -1,0 +1,58 @@
+name: Cask
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # The app is unsigned, so check now and then that the artifact is still there.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Style, audit and fetch
+    runs-on: macos-14
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: brew --version
+
+      # Tap from this checkout so `brew audit` sees the cask as part of a tap.
+      - name: Tap this repository
+        run: |
+          set -euo pipefail
+          brew tap-new --no-git karthikmprakash/notch-audit >/dev/null
+          DEST="$(brew --repository)/Library/Taps/karthikmprakash/homebrew-notch-audit"
+          mkdir -p "$DEST/Casks"
+          cp Casks/notch.rb "$DEST/Casks/notch.rb"
+          echo "TAP_CASK=karthikmprakash/notch-audit/notch" >> "$GITHUB_ENV"
+
+      - name: brew style
+        run: brew style "$TAP_CASK"
+
+      - name: brew audit
+        run: brew audit --cask --online "$TAP_CASK"
+
+      - name: Download the release artifact and check its sha256
+        run: brew fetch --cask "$TAP_CASK"
+
+      - name: The artifact is a real app bundle
+        run: |
+          set -euo pipefail
+          ZIP="$(brew --cache --cask "$TAP_CASK" | tail -1)"
+          APP="$RUNNER_TEMP/release/Notch.app"
+          mkdir -p "$RUNNER_TEMP/release"
+          ditto -x -k "$ZIP" "$RUNNER_TEMP/release"
+          codesign --verify --verbose=1 "$APP"
+          lipo -archs "$APP/Contents/MacOS/Notch"
+          lipo -archs "$APP/Contents/MacOS/Notch" | grep -q x86_64
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$APP/Contents/Info.plist"
+          # Gatekeeper kills unsigned downloads, so clear quarantine first.
+          xattr -dr com.apple.quarantine "$APP" || true
+          echo '{"hook_event_name":"PreToolUse","session_id":"ci","tool_name":"Read","tool_input":{"file_path":"/tmp/x"}}' \
+            | "$APP/Contents/MacOS/Notch" --hook
+          echo "hook command ran from the released build"
