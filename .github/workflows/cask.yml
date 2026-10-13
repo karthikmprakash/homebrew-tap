@@ -33,7 +33,11 @@ jobs:
       - name: brew style
         run: brew style "$TAP_CASK"
 
+      # --online queries the GitHub API, which rate-limits unauthenticated
+      # requests from shared runner IPs (60/hour). The workflow token lifts that.
       - name: brew audit
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
         run: brew audit --cask --online "$TAP_CASK"
 
       - name: Download the release artifact and check its sha256
