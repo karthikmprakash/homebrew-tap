@@ -31,7 +31,7 @@ cask "sm" do
     sm starts locked. Create a desktop passphrase on first launch; Touch ID
     unlocks it on supported Macs. The CLI and MCP are not gated by the app lock.
 
-    This build is not notarized. If macOS blocks it, right-click sm.app once or:
-      xattr -d com.apple.quarantine /Applications/sm.app
+    This build is not notarized. Homebrew clears the quarantine attribute so the
+    app and CLI open normally; review the source before trusting it.
   EOS
 end
