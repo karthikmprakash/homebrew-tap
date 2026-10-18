@@ -18,13 +18,14 @@ cask "sm" do
     "~/Library/WebKit/com.karthikmprakash.sm",
   ]
 
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args:         ["-d", "com.apple.quarantine", "#{appdir}/sm.app"],
-                   must_succeed: false
-    system_command "/usr/bin/xattr",
-                   args:         ["-d", "com.apple.quarantine", "#{HOMEBREW_PREFIX}/bin/sm"],
-                   must_succeed: false
+  # Releases are ad-hoc signed, not notarized. Clearing the quarantine flag
+  # lets the app and CLI start normally; remove this once releases are
+  # notarized.
+  postflight_steps do
+    run "/bin/sh",
+        args: ["-c", "xattr -dr com.apple.quarantine /Applications/sm.app 2>/dev/null || true"]
+    run "/bin/sh",
+        args: ["-c", "xattr -d com.apple.quarantine #{HOMEBREW_PREFIX}/bin/sm 2>/dev/null || true"]
   end
 
   caveats <<~EOS
