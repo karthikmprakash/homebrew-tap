@@ -18,6 +18,15 @@ cask "sm" do
     "~/Library/WebKit/com.karthikmprakash.sm",
   ]
 
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args:         ["-d", "com.apple.quarantine", "#{appdir}/sm.app"],
+                   must_succeed: false
+    system_command "/usr/bin/xattr",
+                   args:         ["-d", "com.apple.quarantine", "#{HOMEBREW_PREFIX}/bin/sm"],
+                   must_succeed: false
+  end
+
   caveats <<~EOS
     sm starts locked. Create a desktop passphrase on first launch; Touch ID
     unlocks it on supported Macs. The CLI and MCP are not gated by the app lock.
