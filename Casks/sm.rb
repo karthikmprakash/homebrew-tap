@@ -2,13 +2,12 @@ cask "sm" do
   version "0.5.1"
   sha256 "9141951eb9f16373149017f16f8361fec3d17b2ce67e5c3ceac1b60d1449ee65"
 
-  url "https://github.com/karthikmprakash/agents-secret-manager/releases/download/v#{version}/sm-macos-app.zip",
-      verified: "github.com/karthikmprakash/agents-secret-manager/"
+  url "https://github.com/karthikmprakash/agents-secret-manager/releases/download/v#{version}/sm-macos-app.zip"
   name "sm"
   desc "Local encrypted secrets for AI coding agents"
   homepage "https://karthikmprakash.github.io/agents-secret-manager/"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   app "sm.app"
   binary "sm"
