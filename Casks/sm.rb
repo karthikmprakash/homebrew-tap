@@ -1,6 +1,6 @@
 cask "sm" do
-  version "0.5.4"
-  sha256 "e032ba3e381227e6eb44724201ad1a2b235833008adaf106cd037159e8097c10"
+  version "0.5.5"
+  sha256 "439bc81fd87342c0ba3b090d55498872016ddb08d0969a5095785c4f7b933f34"
 
   url "https://github.com/karthikmprakash/agents-secret-manager/releases/download/v#{version}/sm-macos-app.zip"
   name "sm"
